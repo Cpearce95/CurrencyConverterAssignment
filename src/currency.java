@@ -1,48 +1,65 @@
-import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+
+/**
+ * @author Chris Pearce
+ *
+ */
 public class currency {
 	
-	public static void main(String[] args) {
-		Scanner scan = new Scanner (System.in);
-		
-	double EUR = 0.8842; //  Random number assigned to variable
-	double GBP = 1.1115; //  Random number assigned to variable
-	double USD = 0.7234; //  Random number assigned to variable
-	double AUD = 0.6708; //  Random number assigned to variable
-	double JPY = 0.3223; //  Random number assigned to variable
+	HashMap<String,Double> Currencies = new HashMap<String,Double>();	//Hash map object instantiated, this holds the currency as the key and the exchange rate as the value
 	
-	System.out.println("What is the three letter symbol in CAPS of the currency you would like to convert from? "); 
-		String UserInputCurrencyFrom = scan.nextLine(); //Users currency from
+	
+	
+	
+	/**
+	 * @param Takes a path to the flat file containing the currency conversion rates
+	 * @return	A map object containing all the currencies in Hashmap<Currency, ConversionRate> format
+	 */
+	public HashMap<String,Double> readCurrenciesToMap(Path p){
+		Currencies.clear();
 		
-	while (!UserInputCurrencyFrom.equals ("EUR") || !UserInputCurrencyFrom.equals ("GBP") || !UserInputCurrencyFrom.equals ("USD") || !UserInputCurrencyFrom.equals ("AUD") || !UserInputCurrencyFrom.equals ("JPY")){
-		
-		System.out.println("This is not a recognised currency, please enter a recognised currency in order to proceed.");
-		break;
+		Charset charset = Charset.forName("US-ASCII");
+		try (BufferedReader reader = Files.newBufferedReader(p, charset)) {
+		    String line = null;
+		    while ((line = reader.readLine()) != null) {
+		    	
+		        String[] ar = line.split(",");
+		        
+		        Currencies.put(ar[0],Double.parseDouble(ar[1]));
+		        
+		    }
+		} catch (IOException x) {
+		    System.err.format("IOException: %s%n", x);
+		}
+	
+		return Currencies;
 	}
+	
+	
+	
+	/**
+	 * @param currencyMap A map containing currencies and their exchange rate
+	 * @param currency A string representing a currency type
+	 * @return	A boolean that represents whether the currency is contained within the map
+	 */
+	public boolean CheckCurrencyValid(HashMap<String, Double> currencyMap, String currency){
 		
-	if (UserInputCurrencyFrom.equals ("EUR") || UserInputCurrencyFrom.equals ("GBP") || UserInputCurrencyFrom.equals ("USD") || UserInputCurrencyFrom.equals ("AUD") || UserInputCurrencyFrom.equals ("JPY")){
+		for(String s : currencyMap.keySet()){
+			if(s.equals(currency)){
+				return true;
+				
+			}
+		}
+			
 		
-		
-	System.out.println("What is the three letter symbol in CAPS of the currency you would like to convert to? ");	
-	} 
-	
-	
-	String UserInputCurrencyTo = scan.nextLine();	// Users currency to 
-	
-	
-	if (UserInputCurrencyTo.equals ("EUR") || UserInputCurrencyTo.equals ("GBP") || UserInputCurrencyTo.equals ("USD") || UserInputCurrencyTo.equals ("AUD") || UserInputCurrencyTo.equals ("JPY")){
-		
-		
-	System.out.println("What value would you like to convert? "); 
-	
-	
-		
-	}	else {
-		
-		System.out.println("This is not a recognised currency, please enter a recognised currency in order to proceed.");
-	} 
-	double UserInputValue = scan.nextInt(); // How much they want to convert
-	System.out.println("You would receive " + GBP / EUR * UserInputValue);
-	
-	
+		return false;
 	}
+	
+	
+	
 }
