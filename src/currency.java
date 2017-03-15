@@ -60,6 +60,19 @@ public class currency {
 		return false;
 	}
 	
+	public double getConversionRate (HashMap<String, Double> currencyMap, String currency){
+		
+		for(String s : currencyMap.keySet()){
+			
+			if(s.equals(currency)){
+				return currencyMap.get(s);
+			}
+			
+		}
+		
+		return 0;
+	}
+	
 	
 	
 }
