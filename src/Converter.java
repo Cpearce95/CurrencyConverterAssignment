@@ -1,4 +1,3 @@
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -6,111 +5,133 @@ import java.util.Scanner;
 import java.io.*;
 import java.util.Date;
 /**
- * @author Chris Pearce
+ * @author Chris Pearce, Pedro Portella
  *
  */
 public class Converter {
 
-	
-	public static void main(String[] args) {
+public static void main(String[] args) {
 		
-		Path p = FileSystems.getDefault().getPath("Currencies" ,"currencies.txt"); //This is the path to the flat file with exchange rates stored
-		currency c = new currency();	//This a new currency object. Used for accessing methods 
-		HashMap<String, Double> currencies = c.readCurrenciesToMap(p); //Create new map and assign to value of returned Hashmap
 		
-		String currencyFrom; //This a string variable representing the currency user chooses to exchange from
-		String currencyTo;	//This a string variable representing the currency user chooses to exchange to
-		String surname; 	//This variable stores the name of the user
-		double amountFrom;	//This is the amount that user wishes to exchange	
-		double amountTo;	//This is the amount that user will receive
-		Scanner input = new Scanner(System.in);
+		currency c = new currency();
+		operator op = new operator();
+		customer user = new customer();
 		Date date = new Date();
-		File CurrenciesFile = new File ("Currencies.txt");
-		File TransactionFile = new File("TransactionLog.txt");
+		Scanner input = new Scanner(System.in);
+	
+		
+	
+		
 		
 			
-		try { 
-			PrintWriter pw = new PrintWriter(TransactionFile);
-			pw.close();
-			TransactionFile.createNewFile();
-			CurrenciesFile.createNewFile();
 		
+		
+		try {
+			c.createTransactionLogFile();
+			c.WriteDefaultRatesToFile();
+		}catch(IOException e){
+			e.printStackTrace();
 			
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block 
-			e1.printStackTrace();
 		}
-			
-			
-		
 	
-		while (true){
-		System.out.println("Please enter your Surname?");
-		surname = input.nextLine();
 		
 		
-		do{
 		
-			System.out.println("Enter a currency to convert from in the offical three letter capital format:");	
-			currencyFrom = input.nextLine();
-
 		
-	
+		
+		while(true){
 				
-			}while(!c.CheckCurrencyValid(currencies, currencyFrom));
-		
-		
-		
-		do{
-			
-		
-			System.out.println("Enter a currency to convert to in the official three letter capital format:");
-			currencyTo = input.nextLine();
-		
-		}while(!c.CheckCurrencyValid(currencies, currencyTo));
-		
-		
-		
-		System.out.println("How much " + currencyFrom + " would you like to convert to " + currencyTo);
-		
-		
-		
-		do {
-			System.out.println("Please enter a value greater than 0");
-			amountFrom = input.nextDouble();
-			input.nextLine();
-		}while (amountFrom < 0);
-			
-		amountTo = currencies.get(currencyTo)/currencies.get(currencyFrom)*amountFrom;
-		System.out.printf("You will receive %.2f " + currencyTo + "\n", amountTo);
-		System.out.println("Do you want to proceed with the transaction? Enter YES in capitals to proceed.");
-		
-		if (input.nextLine().equals("YES")){
-			System.out.println("Creating transaction log");
-			try {
-					FileWriter fw = new FileWriter(TransactionFile, true);
-					
-					String StringAmountTo = String.format("%.02f", amountTo);
-					
-					fw.write(date.toString() + " " + currencyTo + " " + StringAmountTo + " " + surname + "\n");
 				
-					fw.close();
+			
+				System.out.println("Please enter the full path to a CSV rates file location");
+				user.setUserPath(input.nextLine());
+				
+				
+				
+				
+				
+				try{
+					c.readCurrenciesToMap(Paths.get(user.getUserPath()));
+					}
+				catch(Exception ex){
+					System.out.println("Invalid path, using default rates file");
+					try {
+						c.readCurrenciesToMap(c.getDefaultPath());
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
+						
 						e.printStackTrace();
 					}
-			
-			
-	
-		}
-		else{
-			System.out.println("Transaction Cancelled");
-			
-		}
-		}
+				}
 		
-		// input.close
+				
+				
+			
+				System.out.println("Please enter your name");
+				user.setName(input.nextLine());
+			
+			
+			do{
+			
+				System.out.println("Enter a currency to convert from in the offical three letter capital format:");	
+				user.setCurrencyFrom(input.nextLine());
+				}while(!c.CheckCurrencyValid(c.getCurrencies(), user.getCurrencyFrom()));
+			
+			
+			
+			do{
+				System.out.println("Enter a currency to convert to in the official three letter capital format:");
+				
+				user.setCurrencyTo(input.nextLine());
+			}while(!c.CheckCurrencyValid(c.getCurrencies(), user.getCurrencyTo()));
+			
+			
+			
+			System.out.println("How much " + user.getCurrencyFrom() + " Would you like to convert?");
+			
+			
+			
+			do{
+				System.out.println("Please enter an amount greater than 0");
+				
+				user.setAmountFrom(input.nextDouble());
+				input.nextLine();
+			}while(user.getAmountFrom()<0);
+		
+			
+			user.setAmountTo(c.getCurrencies().get(user.getCurrencyTo())/c.getCurrencies().get(user.getCurrencyFrom())*user.getAmountFrom()); 
+			
+			System.out.printf("You will receive %.2f in " + user.getCurrencyTo(),user.getAmountTo());
+			System.out.println();
+			System.out.println("Do you want to proceed? Enter YES in capitals");
+			
+			
+			
+			if(input.nextLine().equals("YES")){
+				System.out.println("Logging transaction to file");
+				
+				try {
+					c.logTransaction(user.getCurrencyTo(), user.getAmountTo(), user.getName());
+				} catch (IOException e) {
+					
+					e.printStackTrace();
+				}	
+				
+			
+			}else{
+				System.out.println("Transaction cancelled");
+				
+				
+				
+			}	
+		System.out.println("----Starting new transaction----");
+		
+		
+		
+		//implement operator methods into main program
+		//Check input of name to avoid blank and numbers
+		}
 	}
+	
 	
 }
 
