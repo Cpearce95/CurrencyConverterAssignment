@@ -1,26 +1,27 @@
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Scanner;
 import java.io.*;
-import java.util.Date;
+import java.nio.file.Paths;
+import java.util.Scanner;
+
+
 /**
  * @author Chris Pearce, Pedro Portella
  *
  */
 public class Converter {
 
-public static void main(String[] args) {
-		
-		
-		currency c = new currency();
-		operator op = new operator();
-		customer user = new customer();
-		Date date = new Date();
-		Scanner input = new Scanner(System.in);
 	
-		
 	
+	private static operator op = new operator();
+	private static customer user = new customer();
+	private static currency c = new currency();
+	public static Scanner input = new Scanner(System.in);
+	
+
+	
+	
+	
+	
+	public static void main(String[] args) {
 		
 		
 			
@@ -41,48 +42,64 @@ public static void main(String[] args) {
 		
 		while(true){
 				
-				
 			
-				System.out.println("Please enter the full path to a CSV rates file location");
+				System.out.println("Please enter the full path to a CSV rates file location or enter any input to use the default rates file");
+				
 				user.setUserPath(input.nextLine());
-				
-				
-				
+
 				
 				
 				try{
 					c.readCurrenciesToMap(Paths.get(user.getUserPath()));
+					System.out.println("File path successful, using your rates.");
+					System.out.println("---------------------------------------");
 					}
 				catch(Exception ex){
-					System.out.println("Invalid path, using default rates file");
 					try {
 						c.readCurrenciesToMap(c.getDefaultPath());
+						System.out.println("Invalid path, using default rates file");
+						System.out.println("---------------------------------------");
 					} catch (IOException e) {
-						
 						e.printStackTrace();
 					}
+					
+						
 				}
+				
+				
+				System.out.println("At any point an operator can now enter a PIN followed by the 4 digit pin. e.g. PIN****");
+				System.out.println("--------------------------------------------------------------------------------------");
+				
 		
+
+				
+				
+				do{ /** asks for their name*/
+					System.out.println("Please enter your name");
+				
+					user.setName(input.nextLine());
+					
+				}while(op.operatorControl(user.getName(), c));	/** Loops if a valid pin was entered OR the name contains anything but characters*/
+				
+				
 				
 				
 			
-				System.out.println("Please enter your name");
-				user.setName(input.nextLine());
-			
-			
-			do{
+			do{ /** asks for the currency they want to convert from*/
 			
 				System.out.println("Enter a currency to convert from in the offical three letter capital format:");	
 				user.setCurrencyFrom(input.nextLine());
-				}while(!c.CheckCurrencyValid(c.getCurrencies(), user.getCurrencyFrom()));
+				op.operatorControl(user.getCurrencyFrom(), c);
+				}while(!c.CheckCurrencyValid(user.getCurrencyFrom()));
 			
 			
 			
-			do{
+			do{ /** asks for the currency they want to convert to */
 				System.out.println("Enter a currency to convert to in the official three letter capital format:");
 				
 				user.setCurrencyTo(input.nextLine());
-			}while(!c.CheckCurrencyValid(c.getCurrencies(), user.getCurrencyTo()));
+				op.operatorControl(user.getCurrencyTo(), c);
+			}while(!c.CheckCurrencyValid(user.getCurrencyTo()));
 			
 			
 			
@@ -90,48 +107,74 @@ public static void main(String[] args) {
 			
 			
 			
-			do{
+	
+		
+			
+			
+			do{	/** asks for the amount they want to exchange */
+				
 				System.out.println("Please enter an amount greater than 0");
 				
-				user.setAmountFrom(input.nextDouble());
-				input.nextLine();
-			}while(user.getAmountFrom()<0);
-		
-			
-			user.setAmountTo(c.getCurrencies().get(user.getCurrencyTo())/c.getCurrencies().get(user.getCurrencyFrom())*user.getAmountFrom()); 
-			
-			System.out.printf("You will receive %.2f in " + user.getCurrencyTo(),user.getAmountTo());
-			System.out.println();
-			System.out.println("Do you want to proceed? Enter YES in capitals");
-			
-			
-			
-			if(input.nextLine().equals("YES")){
-				System.out.println("Logging transaction to file");
 				
-				try {
-					c.logTransaction(user.getCurrencyTo(), user.getAmountTo(), user.getName());
-				} catch (IOException e) {
+				if(input.hasNextDouble()){
+					user.setAmountFrom(input.nextDouble());
+					input.nextLine();
+				}
+				else{
+					op.operatorControl(input.nextLine(), c);
+				}
+				
+			
+
+			}while(user.getAmountFrom()<=0);
+			
+				
+			
+			try{
+			
+				
+				user.setAmountTo(c.getCurrencies().get(user.getCurrencyTo())/c.getCurrencies().get(user.getCurrencyFrom())*user.getAmountFrom()); 
+				
+				
+				
+				
+				String placeHolder;
+				
+				
+				do{
+					System.out.printf("You will receive %.2f in " + user.getCurrencyTo(),user.getAmountTo());
+					System.out.println();
+					System.out.println("Do you want to proceed? Enter YES in capitals");
+					placeHolder = input.nextLine();
+					if(placeHolder.equals("YES")){
+							System.out.println("Logging transaction to file");
+							
+							try {
+								c.logTransaction(user.getCurrencyTo(), user.getAmountTo(), user.getName());
+							} catch (IOException e) {
+								
+								e.printStackTrace();
+							}	
+							
 					
-					e.printStackTrace();
-				}	
-				
+					}else if (op.checkPin(placeHolder)==-1){
+							System.out.println("Transaction cancelled");
+						
+					}	
+					
+				}while(op.operatorControl(placeHolder, c));	
+					
+			}catch(Exception e){
+				System.out.println("Sorry, currency has been suspended");
+			}
 			
-			}else{
-				System.out.println("Transaction cancelled");
-				
-				
-				
-			}	
-		System.out.println("----Starting new transaction----");
+			
+		System.out.println("-------Starting new transaction-------");
 		
 		
-		
-		//implement operator methods into main program
-		//Check input of name to avoid blank and numbers
+		//validate input, use trim, regular expressions.
+		//Double check 10percent difference method maths
 		}
 	}
-	
-	
 }
 

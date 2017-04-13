@@ -10,11 +10,11 @@ import java.nio.file.Paths;
 import java.util.Date;
 import java.util.HashMap;
 
-
 /**
  * @author Chris Pearce, Pedro Portella
  *
  */
+
 public class currency {
 	
 	private Date date = new Date();
@@ -66,6 +66,13 @@ public class currency {
 	}
 	
 	
+	/**
+	 * Records the user information to the logs file.
+	 * @param CurrencyTo
+	 * @param AmountTo
+	 * @param name
+	 * @throws IOException
+	 */
 	public void logTransaction(String CurrencyTo, double AmountTo, String name) throws IOException{
 		 FileWriter fw = new FileWriter(transactionFile, true);
 		 
@@ -111,9 +118,9 @@ public class currency {
 	 * @param currency A string representing a currency type
 	 * @return	A boolean that represents whether the currency is contained within the map
 	 */
-	public boolean CheckCurrencyValid(HashMap<String, Double> currencyMap, String currency){
+	public boolean CheckCurrencyValid( String currency){
 		
-		for(String s : currencyMap.keySet()){
+		for(String s : Currencies.keySet()){
 			if(s.equals(currency)){
 				return true;
 				
@@ -139,7 +146,12 @@ public class currency {
 	public HashMap<String, Double> getCurrencies() {
 		return Currencies;
 	}
-
 	
+	public String[] getDefaultRates() {
+		return DefaultRates;
+	}
 	
+	public File getCurrenciesFile() {
+		return currenciesFile;
+	}
 }

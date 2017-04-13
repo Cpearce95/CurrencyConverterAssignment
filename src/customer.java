@@ -1,11 +1,16 @@
 
+
+/**
+ * @author Chris Pearce, Pedro Portella
+ *
+ */
 public class customer {
 
 	private String currencyFrom; /** String representing the currency to be exchanged from **/
 	private String currencyTo;	/** String representing the currency to be exchanged to **/
 	private String name; /** Stored name of user **/
 	private String UserPath; /** Path to currency rates file designated by user **/
-	private double amountFrom; /** Double representing the amount the user wants to exchange **/
+	private double amountFrom = 0; /** Double representing the amount the user wants to exchange **/
 	private double amountTo; /** Double representing the amount the user will receive **/
 	
 	
@@ -53,6 +58,5 @@ public class customer {
 	public void setUserPath(String userPath) {
 		UserPath = userPath;
 	}
-		
 	
 }
